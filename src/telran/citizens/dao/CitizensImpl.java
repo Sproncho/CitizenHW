@@ -3,10 +3,7 @@ package telran.citizens.dao;
 import telran.citizens.interfaces.Citizens;
 import telran.citizens.model.Person;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class CitizensImpl implements Citizens {
     private List<Person> idList = new ArrayList<>();
@@ -14,21 +11,23 @@ public class CitizensImpl implements Citizens {
     private List<Person> ageList = new ArrayList<>();
 
     public CitizensImpl(List<Person> list) {
-        //TODO
+        for(Person person: list){
+            add(person);
+        }
     }
     public CitizensImpl(){}
     @Override
     public boolean add(Person person) {
-        int ind = Collections.binarySearch(idList,person);
-        if(ind > 0)
+        if(idList.contains(person))
             return false;
+        int ind = Collections.binarySearch(idList,person);
         ind = -ind -1;
         idList.add(ind,person);
         ind = Collections.binarySearch(lastNameList,person,new LastNameComparator());
-        ind = -ind -1;
+        ind = ind < 0? -ind -1 :ind;
         lastNameList.add(ind,person);
         ind = Collections.binarySearch(ageList,person,new AgeComparator());
-        ind = -ind  -1;
+        ind = ind < 0? -ind -1 :ind;
         ageList.add(ind,person);
         return true;
     }
@@ -50,33 +49,58 @@ public class CitizensImpl implements Citizens {
 
     @Override
     public Iterable<Person> find(int minAge, int maxAge) {
-//        ArrayList<Person> res = Collections.
-        return null;
+        AgeComparator ageComp = new AgeComparator();
+        int from  = Collections.binarySearch(ageList,new Person(0,null,null,minAge), ageComp);
+        from  = from < 0 ? - from - 1 : from;
+        while(from > 0 && ageList.get(from).getAge() > minAge)
+            from--;
+        from++;
+        int to  = Collections.binarySearch(ageList,new Person(0,null,null,maxAge),ageComp);
+        to =  to < 0 ? - to - 1 : to;
+        while (to < size() && ageList.get(to).getAge() < maxAge)
+            to++;
+        List<Person> res = new ArrayList<>();
+        for (int i = from; i < to; i++) {
+            res.add(ageList.get(i));
+        }
+        return res;
     }
 
     @Override
     public Iterable<Person> find(String lastName) {
-        return null;
+        LastNameComparator lastNameComparator = new LastNameComparator();
+        int ind = Collections.binarySearch(lastNameList,new Person(0,null,lastName,0),lastNameComparator);
+        if(ind < 0) return new LinkedList<Person>();
+        int from = ind,  to = ind;
+        while (from > 0 && lastNameList.get(from).getLastName().equals(lastName))
+            from--;
+        while (to < size() && lastNameList.get(to).getLastName().equals(lastName))
+            to++;
+        List<Person> res = new ArrayList<>();
+        for (int i = from; i < to; i++) {
+            res.add(lastNameList.get(i));
+        }
+        return res;
     }
 
     @Override
     public Iterable<Person> getAllPersonSortedById() {
-        return null;
+        return  idList;
     }
 
     @Override
     public Iterable<Person> getAllPersonSortedByAge() {
-        return null;
+        return ageList;
     }
 
     @Override
     public Iterable<Person> getAllPersonSortedByLastName() {
-        return null;
+        return lastNameList;
     }
 
     @Override
     public int size() {
-        return 0;
+        return ageList.size();
     }
     private static class LastNameComparator implements Comparator<Person>{
 
