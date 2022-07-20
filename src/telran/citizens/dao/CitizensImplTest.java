@@ -11,6 +11,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CitizensImplTest {
+
     Citizens citizens;
     List<Person> plist = Arrays.asList(
             new Person(1, "Peter", "Jackson", 23),

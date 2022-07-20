@@ -10,6 +10,8 @@ public class CitizensImpl implements Citizens {
     private List<Person> lastNameList = new ArrayList<>();
     private List<Person> ageList = new ArrayList<>();
 
+    private static AgeComparator ageComparator= new AgeComparator();
+    private static LastNameComparator lastNameComparator = new LastNameComparator();
     public CitizensImpl(List<Person> list) {
         for(Person person: list){
             add(person);
@@ -23,10 +25,10 @@ public class CitizensImpl implements Citizens {
         int ind = Collections.binarySearch(idList,person);
         ind = -ind -1;
         idList.add(ind,person);
-        ind = Collections.binarySearch(lastNameList,person,new LastNameComparator());
+        ind = Collections.binarySearch(lastNameList,person,lastNameComparator);
         ind = ind < 0? -ind -1 :ind;
         lastNameList.add(ind,person);
-        ind = Collections.binarySearch(ageList,person,new AgeComparator());
+        ind = Collections.binarySearch(ageList,person,ageComparator);
         ind = ind < 0? -ind -1 :ind;
         ageList.add(ind,person);
         return true;
@@ -49,13 +51,12 @@ public class CitizensImpl implements Citizens {
 
     @Override
     public Iterable<Person> find(int minAge, int maxAge) {
-        AgeComparator ageComp = new AgeComparator();
-        int from  = Collections.binarySearch(ageList,new Person(0,null,null,minAge), ageComp);
+        int from  = Collections.binarySearch(ageList,new Person(0,null,null,minAge), ageComparator);
         from  = from < 0 ? - from - 1 : from;
         while(from > 0 && ageList.get(from).getAge() > minAge)
             from--;
         from++;
-        int to  = Collections.binarySearch(ageList,new Person(0,null,null,maxAge),ageComp);
+        int to  = Collections.binarySearch(ageList,new Person(0,null,null,maxAge),ageComparator);
         to =  to < 0 ? - to - 1 : to;
         while (to < size() && ageList.get(to).getAge() < maxAge)
             to++;
@@ -68,7 +69,6 @@ public class CitizensImpl implements Citizens {
 
     @Override
     public Iterable<Person> find(String lastName) {
-        LastNameComparator lastNameComparator = new LastNameComparator();
         int ind = Collections.binarySearch(lastNameList,new Person(0,null,lastName,0),lastNameComparator);
         if(ind < 0) return new LinkedList<Person>();
         int from = ind,  to = ind;
